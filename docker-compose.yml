@@ -1,15 +1,15 @@
 version: "3"
 
 volumes: 
-  - MONGODB_DATA : {} 
-  - MONGODB_LOGS : {}
-  - ELASTICSEARCH_DATA: {}
-  - ELASTICSEARCH_LOGS: {}
-  - ELASTICSEARCH_LOG_CONFIG: "./elasticsearch/logging.yml"
-  - REDIS_MASTER_DATA : {}
-  - REDIS_SLAVE_DATA : {}
-  - REDIS_LOGS : {}
-  - POSTGRES_DATA: {}
+  MONGODB_DATA : {} 
+  MONGODB_LOGS : {}
+  ELASTICSEARCH_DATA: {}
+  ELASTICSEARCH_LOGS: {}
+  ELASTICSEARCH_LOG_CONFIG: {} #"./elasticsearch/logging.yml"
+  REDIS_MASTER_DATA : {}
+  REDIS_SLAVE_DATA : {}
+  REDIS_LOGS : {}
+  POSTGRES_DATA: {}
 
 
 services: 
@@ -57,7 +57,7 @@ services:
       - mongo2
       - mongo3
     volumes:
-      - ./scripts:/scripts
+      - ./scripts/mongo-rs-setup.sh:/scripts/setup.sh
     entrypoint: [ "/scripts/setup.sh" ]
 
 
