@@ -50,9 +50,19 @@ elasticsearch:
     - mongo2:mongo2
     - mongo3:mongo3
   volumes:
+    # - /elasticsearch/data:/usr/share/elasticsearch/data
     - ./elasticsearch/logging.yml:/etc/elasticsearch/logging.yml
   restart: always
 
+
+elasticsearch-hq:
+  image: elastichq/elasticsearch-hq
+  ports:
+    - "5000:5000"
+  environment:
+    - HQ_DEFAULT_URL=http://localhost:9200
+  links:
+    - elasticsearch:elasticsearch
 
 ###################################################################
 # Make sure you include either mongo-connector OR transporter.
