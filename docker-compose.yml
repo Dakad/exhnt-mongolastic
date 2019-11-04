@@ -1,4 +1,17 @@
 version: "3"
+
+volumes: 
+  - MONGODB_DATA : {} 
+  - MONGODB_LOGS : {}
+  - ELASTICSEARCH_DATA: {}
+  - ELASTICSEARCH_LOGS: {}
+  - ELASTICSEARCH_LOG_CONFIG: "./elasticsearch/logging.yml"
+  - REDIS_MASTER_DATA : {}
+  - REDIS_SLAVE_DATA : {}
+  - REDIS_LOGS : {}
+  - POSTGRES_DATA: {}
+
+
 services: 
   mongo3:
     hostname: mongo3
@@ -74,6 +87,8 @@ services:
       - HQ_DEFAULT_URL=http://elasticsearch:9200
     depends_on:
       - elasticsearch
+
+
 
   ###################################################################
   # Make sure you include either mongo-connector OR transporter.
