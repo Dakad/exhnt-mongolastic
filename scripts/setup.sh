@@ -11,7 +11,7 @@ until curl http://${MONGODB1}:28017/serverStatus\?text\=1 2>&1 | grep uptime | h
 done
 
 echo curl http://${MONGODB1}:28017/serverStatus\?text\=1 2>&1 | grep uptime | head -1
-echo "Started.."
+echo "Started..."
 
 
 echo SETUP.sh time now: `date +"%T" `
