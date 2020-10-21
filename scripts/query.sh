@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+# Any subsequent(*) commands which fail will cause the shell script to exit immediately
 
 MONGO_RS_1=`ping -c 1 mongo-rs0-1 | head -1  | cut -d "(" -f 2 | cut -d ")" -f 1`
 MONGO_RS_2=`ping -c 1 mongo-rs0-2 | head -1  | cut -d "(" -f 2 | cut -d ")" -f 1`
