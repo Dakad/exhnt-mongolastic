@@ -2,6 +2,8 @@
 set -ev
 # Any subsequent(*) commands which fail will cause the shell script to exit immediately
 
+printf "\nIN TRANSPORTER SETUP\n"
+
 MONGO=`ping -c 1 mongo-rs0-1 | head -1  | cut -d "(" -f 2 | cut -d ")" -f 1`
 ES=`ping -c 1 elasticsearch | head -1  | cut -d "(" -f 2 | cut -d ")" -f 1`
 MARKER=/scripts/.transpoter_on
