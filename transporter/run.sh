@@ -26,7 +26,7 @@ go build -a ./cmd/transporter/...
 #godep go install ./cmd/...
 
 
-/scripts/wait-until-started.sh
+/scripts/wait-until-mongodb-started.sh
 
 touch $MARKER
 ./transporter run --config ./config.yaml ./mongo-es.js

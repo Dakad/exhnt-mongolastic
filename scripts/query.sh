@@ -6,7 +6,7 @@ MONGO_RS_3=`ping -c 1 mongo-rs0-3 | head -1  | cut -d "(" -f 2 | cut -d ")" -f 1
 ES=`ping -c 1 elasticsearch | head -1  | cut -d "(" -f 2 | cut -d ")" -f 1`
 
 
-/scripts/wait-until-started.sh
+/scripts/wait-until-mongodb-started.sh
 
 
 echo "================================="
