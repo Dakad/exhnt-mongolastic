@@ -157,7 +157,7 @@ services:
     container_name: redis-commander
     hostname: redis-commander
     image: rediscommander/redis-commander:latest
-    restart: always
+    #restart: always
     environment:
       - REDIS_HOSTS=master:redis-master, slave-a:redis-slave
     ports:
@@ -190,17 +190,20 @@ services:
   # https://github.com/compose/transporter
   # https://www.compose.io/articles/transporter-driving-part-one/
   transporter:
-    image: golang:1.5
+    image: naniwana/compose-transporter 
     container_name: mongolastic-transporter
     depends_on:
       - mongo-rs0-1
       - mongo-rs0-2
       - mongo-rs0-3
       - elasticsearch
+    environment:
+      - MONGODB_URI=mongodb://mongo-rs0-1/harvester-test
+      - ELASTICSEARCH_URI=http://elasticsearch:9200/
     volumes:
       - ./transporter:/transporter
       - ./scripts:/scripts
-    entrypoint: [ "/transporter/run.sh" ]
+    command: [ "run", "/transporter/pipeline.js" ]
     restart: always
 
 

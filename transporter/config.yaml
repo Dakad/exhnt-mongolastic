@@ -1,7 +1,7 @@
 nodes:
   mongo:
     type: mongo
-    uri: mongodb://mongo1/harvester-test
+    uri: mongodb://mongo-rs0-1/harvester-test
     namespace: harvester-test.entries
     debug: true
   es:
