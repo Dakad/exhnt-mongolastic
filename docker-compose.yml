@@ -8,6 +8,7 @@ volumes:
   ELASTICSEARCH_LOG_CONFIG: {} #"./elasticsearch/logging.yml"
   REDIS_MASTER_DATA : {}
   REDIS_SLAVE_DATA : {}
+  REDIS_SLAVE_CONF: {} # "./redis-replica"
   REDIS_LOGS : {}
   SQL_DATA: {}
 
@@ -126,7 +127,10 @@ services:
       - REDIS_MASTER_PORT_NUMBER=6379
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     volumes:
+      - ./redis-replica/redis.conf:/usr/local/etc/redis/redis.conf
       - REDIS_SLAVE_DATA:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+
 
   redis-sentinel-1:
     container_name: redis-sentinel-1
@@ -140,14 +144,26 @@ services:
     depends_on:
       - redis-master
 
-  webdis:
-    container_name: webdis
-    image: anapsix/webdis
-    ports: 
-      - "27379:7379"
-    depends_on: 
-      - "redis-master"
+#  webdis:
+#    container_name: webdis
+#    image: anapsix/webdis
+#    ports:
+#      - "27379:7379"
+#    depends_on:
+#      - "redis-slave"
+#    restart: always
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
     restart: always
+    environment:
+      - REDIS_HOSTS=master:redis-master, slave-a:redis-slave
+    ports:
+      - "28081:8081"
+    depends_on:
+      - redis-slave
 
 
   ###################################################################
@@ -212,3 +228,4 @@ services:
     volumes:
       - ./scripts:/scripts
     entrypoint: [ "/scripts/query.sh" ]
+
