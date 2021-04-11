@@ -83,7 +83,7 @@ services:
     ports:
       - "25000:5000"
     environment:
-      - HQ_DEFAULT_URL=http://elasticsearch:29200
+      - HQ_DEFAULT_URL=http://elasticsearch:9200
     depends_on:
       - elasticsearch
 
