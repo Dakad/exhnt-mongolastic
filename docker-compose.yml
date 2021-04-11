@@ -1,7 +1,7 @@
 version: "3"
 
-volumes: 
-  MONGODB_DATA : {} 
+volumes:
+  MONGODB_DATA : {}
   MONGODB_LOGS : {}
   ELASTICSEARCH_DATA: {}
   ELASTICSEARCH_LOGS: {}
@@ -12,51 +12,50 @@ volumes:
   SQL_DATA: {}
 
 
-services: 
-  mongo3:
-    hostname: mongo3
+services:
+  mongo-rs0-3:
     image: mongo:3.0.6
+    hostname: mongo-rs0-3
     container_name: mongo-rs3
-    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles", "--rest", "--httpinterface" ]
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs0", "--journal", "--smallfiles", "--rest", "--httpinterface" ]
     ports:
       - "27019:27017"
       - "28019:28017"
     restart: always
 
-
-  mongo2:
-    hostname: mongo2
+  mongo-rs0-2:
     image: mongo:3.0.6
+    hostname: mongo-rs0-2
     container_name: mongo-rs2
-    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles", "--rest", "--httpinterface" ]
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs0", "--journal", "--smallfiles", "--rest", "--httpinterface" ]
     ports:
       - "27018:27017"
       - "28018:28017"
     restart: always
 
-
-  mongo1:
-    hostname: mongo1
+  mongo-rs0-1:
     image: mongo:3.0.6
+    hostname: mongo-rs0-1
     container_name: mongo-rs1
-    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles", "--rest", "--httpinterface" ]
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs0", "--journal", "--smallfiles", "--rest", "--httpinterface" ]
     ports:
       - "27017:27017"
       - "28017:28017"
     depends_on:
-      - mongo2
-      - mongo3
+      - mongo-rs0-2
+      - mongo-rs0-3
     restart: always
 
   # This configures the MongoDB replicaset
-  mongosetup:
+  mongo-setup:
     image: mongo:3.0.6
     container_name: mongo-setup
     depends_on:
-      - mongo1
-      - mongo2
-      - mongo3
+      - mongo-rs0-1
+      - mongo-rs0-2
+      - mongo-rs0-3
     volumes:
+      - ./.docker/mongodb/mongod.conf:/etc/mongod.conf
       - ./scripts/mongo-rs-setup.sh:/scripts/setup.sh
     entrypoint: [ "/scripts/setup.sh" ]
 
@@ -66,14 +65,14 @@ services:
     image: stabenfeldt/elasticsearch-marvel
     container_name: elasticsearch
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "29200:9200"
+      - "29300:9300"
     depends_on:
-      - mongo1
-      - mongo2
-      - mongo3
+      - mongo-rs0-1
+      - mongo-rs0-2
+      - mongo-rs0-3
     volumes:
-      # - =./elasticsearch/data:/usr/share/elasticsearch/data
+      - ELASTICSEARCH_DATA:/usr/share/elasticsearch/data
       - ./elasticsearch/logging.yml:/etc/elasticsearch/logging.yml
     restart: always
 
@@ -82,9 +81,9 @@ services:
     image: elastichq/elasticsearch-hq
     container_name: elasticsearch_hq
     ports:
-      - "5000:5000"
+      - "25000:5000"
     environment:
-      - HQ_DEFAULT_URL=http://elasticsearch:9200
+      - HQ_DEFAULT_URL=http://elasticsearch:29200
     depends_on:
       - elasticsearch
 
@@ -96,7 +95,7 @@ services:
       - MYSQL_USER=root
       - MYSQL_ROOT_PASSWORD=secret-pwd
     ports:
-      - "33060:3306"
+      - "23306:3306"
     volumes:
       - SQL_DATA:/var/lib/data
     restart: always
@@ -106,7 +105,7 @@ services:
     container_name: redis-master
     image: redis:5-alpine
     ports:
-      - "6379:6379"
+      - "26379:6379"
     environment:
       - REDIS_REPLICATION_MODE=master
       - REDIS_PASSWORD=my_password
@@ -145,7 +144,7 @@ services:
     container_name: webdis
     image: anapsix/webdis
     ports: 
-      - "7379:7379"
+      - "27379:7379"
     depends_on: 
       - "redis-master"
     restart: always
@@ -161,9 +160,9 @@ services:
   #connector:
   #  image: python:latest
   #  depends_on:
-  #    - mongo1
-  #    - mongo2
-  #    - mongo3
+  #    - mongo-rs0-1
+  #    - mongo-rs0-2
+  #    - mongo-rs0-3
   #    - elasticsearch:elasticsearch
   #  volumes:
   #    - ./scripts:/scripts
@@ -178,9 +177,9 @@ services:
     image: golang:1.5
     container_name: mongolastic-transporter
     depends_on:
-      - mongo1
-      - mongo2
-      - mongo3
+      - mongo-rs0-1
+      - mongo-rs0-2
+      - mongo-rs0-3
       - elasticsearch
     volumes:
       - ./transporter:/transporter
@@ -192,6 +191,7 @@ services:
   # Make sure ES does not rellocate it's shards when it has low disk space.
   disabledisktreshold:
     image: mongo:3.0.6
+    container_name: mongolastic-disable_disk_treshold
     depends_on:
       - elasticsearch
     volumes:
@@ -205,9 +205,9 @@ services:
     image: mongo:3.0.6
     container_name: mongolastic-verify
     depends_on:
-      - mongo1
-      - mongo2
-      - mongo3
+      - mongo-rs0-1
+      - mongo-rs0-2
+      - mongo-rs0-3
       - elasticsearch
     volumes:
       - ./scripts:/scripts
