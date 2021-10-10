@@ -10,7 +10,7 @@
 
 ```bash
 
-git clone https://github.com/soldotno/elastic-mongo.git
+git clone https://github.com/stabenfeldt/elastic-mongo.git
 cd elastic-mongo
 docker-compose up -d  # If you skip -d, then the entire clusted will go down when
                       # mongosetup and elasticsearch-river-setup are done.
@@ -29,8 +29,13 @@ CONTAINER ID        IMAGE               COMMAND                CREATED          
 
 ```
 
+### Connect to the MongoDB cluster from your workstation
+```
+mongosh 0.0.0.0:27017
+```
+
 ### Log into a container
 ```
-docker exec -i -t elasticmongo_mongo3_1  bash
+docker-compose exec transporter bash
 ```
   
