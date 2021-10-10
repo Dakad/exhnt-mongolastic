@@ -1,16 +1,17 @@
 version: "3"
 
 volumes:
-  MONGODB_DATA : {}
-  MONGODB_LOGS : {}
-  ELASTICSEARCH_DATA: {}
-  ELASTICSEARCH_LOGS: {}
-  ELASTICSEARCH_LOG_CONFIG: {} #"./elasticsearch/logging.yml"
-  REDIS_MASTER_DATA : {}
-  REDIS_SLAVE_DATA : {}
-  REDIS_SLAVE_CONF: {} # "./redis-replica"
-  REDIS_LOGS : {}
-  SQL_DATA: {}
+  MONGODB_DATA : 
+  MONGODB_LOGS : 
+  ELASTICSEARCH_DATA: 
+  ELASTICSEARCH_LOGS: 
+  ELASTICSEARCH_LOG_CONFIG: #"./elasticsearch/logging.yml"
+  REDIS_MASTER_DATA : 
+  REDIS_SLAVE_DATA : 
+  REDIS_SLAVE_CONF: # "./redis-replica"
+  REDIS_LOGS : 
+  SQL_MASTER_DATA : 
+  SQL_SLAVE_DATA : 
 
 
 services:
@@ -122,12 +123,14 @@ services:
   mariadb-slave:
     image: "bitnami/mariadb:10.3"
     container_name: "mariadb-slave"
+    restart: always
+    depends_on:
+      - mariadb-master
     ports:
       - "23306:3306"
     volumes:
       - SQL_SLAVE_DATA:/bitnami/mariadb
       - ./mariadb-replica/slave.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
-    restart: always
     environment:
       - MARIADB_REPLICATION_MODE=slave
       - MARIADB_MASTER_HOST=mariadb-master
