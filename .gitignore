@@ -2,7 +2,7 @@
 ## Custom ##
 data/*
 datadir?/*
-scripts/TRANSPORTER-STARTED
+scripts/.TRANSPORTER_STARTED
 
 
 # Created by https://www.gitignore.io/api/macos

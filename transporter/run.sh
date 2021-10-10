@@ -6,7 +6,7 @@ printf "\nIN TRANSPORTER SETUP\n"
 
 MONGO=`ping -c 1 mongo-rs0-1 | head -1  | cut -d "(" -f 2 | cut -d ")" -f 1`
 ES=`ping -c 1 elasticsearch | head -1  | cut -d "(" -f 2 | cut -d ")" -f 1`
-MARKER=/scripts/.TRANSPORTER-STARTED
+MARKER=/scripts/.TRANSPORTER_STARTED
 
 # Cleanup from previous runs
 if test -f "$MARKER"; then

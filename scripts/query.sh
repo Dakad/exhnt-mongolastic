@@ -38,7 +38,7 @@ sleep 4
 
 printf "\nWaiting for the transporter to start\n\n"
 
-until test -f /scripts/.TRANSPORTER-STARTED; do
+until test -f /scripts/.TRANSPORTER_STARTED; do
   printf '.'
   sleep 1
 done
