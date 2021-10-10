@@ -104,16 +104,25 @@ services:
 
 
   mariadb-master:
-    image: "bitnami/mariadb:10.3"
+    image: "bitnami/mariadb:${MARIADB_IMAGE_TAG}"
     container_name: "mariadb-master"
+    restart: always
     ports:
       - "23306:3306"
     volumes:
       - SQL_MASTER_DATA:/bitnami/mariadb
-      - ./mariad-replica/master.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
-    restart: always
+     #- ./mariadb-replica/master.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
     environment:
+      - MARIADB_COLLATE
+      - MARIADB_CHARACTER_SET
+      - MARIADB_SKIP_TEST_DB
       - MARIADB_REPLICATION_MODE=master
+      - MARIADB_REPLICATION_USER
+      - MARIADB_REPLICATION_PASSWORD
+      - MARIADB_ROOT_USER
+      - MARIADB_ROOT_PASSWORD
+      - MARIADB_USER
+      - MARIADB_PASSWORD
     healthcheck:
       test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
       interval: 15s
@@ -121,7 +130,7 @@ services:
       retries: 6
 
   mariadb-slave:
-    image: "bitnami/mariadb:10.3"
+    image: "bitnami/mariadb:${MARIADB_IMAGE_TAG}"
     container_name: "mariadb-slave"
     restart: always
     depends_on:
@@ -130,12 +139,17 @@ services:
       - "23306:3306"
     volumes:
       - SQL_SLAVE_DATA:/bitnami/mariadb
-      - ./mariadb-replica/slave.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
+      #- ./mariadb-replica/slave.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
     environment:
+      - MARIADB_COLLATE
+      - MARIADB_CHARACTER_SET
+      - MARIADB_SKIP_TEST_DB
       - MARIADB_REPLICATION_MODE=slave
       - MARIADB_MASTER_HOST=mariadb-master
       - MARIADB_MASTER_PORT_NUMBER=3306
       - MARIADB_MASTER_ROOT_PASSWORD
+      - MARIADB_REPLICATION_USER
+      - MARIADB_REPLICATION_PASSWORD
     healthcheck:
       test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
       interval: 15s

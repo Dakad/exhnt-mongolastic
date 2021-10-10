@@ -1,11 +1,9 @@
 [mysqladmin]
-user=master
 
 [mysqld]
 skip_name_resolve
 explicit_defaults_for_timestamp
 basedir=/opt/bitnami/mysql
-port=3306
 tmpdir=/opt/bitnami/mysql/tmp
 socket=/opt/bitnami/mysql/tmp/mysql.sock
 pid_file=/opt/bitnami/mysql/tmp/mysqld.pid
@@ -21,13 +19,11 @@ binlog_format=ROW
 log-bin
 
 [client]
-port=3306
 socket=/opt/bitnami/mysql/tmp/mysql.sock
 default_character_set=UTF8
 plugin_dir=/opt/bitnami/mysql/lib/plugin
 
 [manager]
-port=3306
 socket=/opt/bitnami/mysql/tmp/mysql.sock
 pid_file=/opt/bitnami/mysql/tmp/mysqld.pid
 !include /opt/bitnami/mysql/conf/bitnami
