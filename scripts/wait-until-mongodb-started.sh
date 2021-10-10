@@ -4,21 +4,12 @@ set -ev
 MONGODB1=`ping -c 1 mongo-rs0-1 | head -1  | cut -d "(" -f 2 | cut -d ")" -f 1`
 ES=`ping -c 1 elasticsearch | head -1  | cut -d "(" -f 2 | cut -d ")" -f 1`
 
-<<<<<<< HEAD:scripts/wait-until-started.sh
 #echo "Waiting for the mongos to complete the election."
 #until curl http://${MONGODB1}:28017/isMaster\?text\=1  2>&1 | grep ismaster | grep true; do
 #  printf '.'
 #  sleep 1
 #done
 #echo "The primary is elected."
-=======
-# echo "Waiting for the mongos to complete the election."
-# until curl http://${MONGODB1}:28017/isMaster\?text\=1  2>&1 | grep ismaster | grep true; do
-#   printf '.'
-#   sleep 1
-# done
-# echo "The primary is elected."
->>>>>>> 042d1e7 (Renamed to give a better understandig of purpose.):scripts/wait-until-mongodb-started.sh
 
 echo "Waiting for Elasticsearch to start."
 until curl ${ES}:9200/_cluster/health?pretty 2>&1 | grep status | egrep "(green|yellow)"; do
