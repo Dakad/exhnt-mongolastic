@@ -2,16 +2,12 @@ version: "3"
 
 volumes:
   MONGODB_DATA : 
-  MONGODB_LOGS : 
   ELASTICSEARCH_DATA: 
-  ELASTICSEARCH_LOGS: 
-  ELASTICSEARCH_LOG_CONFIG: #"./elasticsearch/logging.yml"
   REDIS_MASTER_DATA : 
   REDIS_SLAVE_DATA : 
-  REDIS_SLAVE_CONF: # "./redis-replica"
-  REDIS_LOGS : 
   SQL_MASTER_DATA : 
   SQL_SLAVE_DATA : 
+  LOGS : 
 
 
 services:
@@ -74,8 +70,8 @@ services:
       - mongo-rs0-2
       - mongo-rs0-3
     volumes:
-      - ELASTICSEARCH_DATA:/usr/share/elasticsearch/data
       - ./elasticsearch/logging.yml:/etc/elasticsearch/logging.yml
+      - ELASTICSEARCH_DATA:/usr/share/elasticsearch/data
     restart: always
 
 
@@ -181,7 +177,7 @@ services:
       - REDIS_MASTER_PORT_NUMBER=6379
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     volumes:
-      - ./redis-replica/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis-replica/redis-slave.conf:/usr/local/etc/redis/redis.conf
       - REDIS_SLAVE_DATA:/data
     command: redis-server /usr/local/etc/redis/redis.conf
 
