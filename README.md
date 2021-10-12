@@ -12,7 +12,7 @@
 
 git clone https://github.com/Dakad/my-redmongolastic.git dbs-infrastructure
 cd $_
-cp .env.temple .env
+cp .env.template .env
 docker-compose up -d  # If you skip -d, then the entire clusted will go down when
                       # mongosetup and elasticsearch-river-setup are done.
 ```

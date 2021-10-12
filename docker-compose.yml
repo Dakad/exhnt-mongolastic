@@ -2,12 +2,19 @@ version: "3"
 
 volumes:
   MONGODB_DATA : 
+    external: true
   ELASTICSEARCH_DATA: 
+    external: true
   REDIS_MASTER_DATA : 
+    external: true
   REDIS_SLAVE_DATA : 
+    external: true
   SQL_MASTER_DATA : 
+    external: true
   SQL_SLAVE_DATA : 
+    external: true
   LOGS : 
+    external: true
 
 
 services:
