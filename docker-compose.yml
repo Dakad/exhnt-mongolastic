@@ -1,21 +1,25 @@
 version: "3"
 
 volumes:
-  MONGODB_DATA : {}
-  MONGODB_LOGS : {}
-  ELASTICSEARCH_DATA: {}
-  ELASTICSEARCH_LOGS: {}
-  ELASTICSEARCH_LOG_CONFIG: {} #"./elasticsearch/logging.yml"
-  REDIS_MASTER_DATA : {}
-  REDIS_SLAVE_DATA : {}
-  REDIS_SLAVE_CONF: {} # "./redis-replica"
-  REDIS_LOGS : {}
-  SQL_DATA: {}
+  MONGODB_DATA : 
+    external: true
+  ELASTICSEARCH_DATA: 
+    external: true
+  REDIS_MASTER_DATA : 
+    external: true
+  REDIS_SLAVE_DATA : 
+    external: true
+  SQL_MASTER_DATA : 
+    external: true
+  SQL_SLAVE_DATA : 
+    external: true
+  LOGS : 
+    external: true
 
 
 services:
   mongo-rs0-3:
-    image: mongo:3.0.6
+    image: "mongo:${MONGO_IMAGE_TAG}"
     hostname: mongo-rs0-3
     container_name: mongo-rs3
     entrypoint: [ "/usr/bin/mongod", "--replSet", "rs0", "--journal", "--smallfiles", "--rest", "--httpinterface" ]
@@ -25,7 +29,7 @@ services:
     restart: always
 
   mongo-rs0-2:
-    image: mongo:3.0.6
+    image: "mongo:${MONGO_IMAGE_TAG}"
     hostname: mongo-rs0-2
     container_name: mongo-rs2
     entrypoint: [ "/usr/bin/mongod", "--replSet", "rs0", "--journal", "--smallfiles", "--rest", "--httpinterface" ]
@@ -35,7 +39,7 @@ services:
     restart: always
 
   mongo-rs0-1:
-    image: mongo:3.0.6
+    image: "mongo:${MONGO_IMAGE_TAG}"
     hostname: mongo-rs0-1
     container_name: mongo-rs1
     entrypoint: [ "/usr/bin/mongod", "--replSet", "rs0", "--journal", "--smallfiles", "--rest", "--httpinterface" ]
@@ -49,7 +53,7 @@ services:
 
   # This configures the MongoDB replicaset
   mongo-setup:
-    image: mongo:3.0.6
+    image: "mongo:${MONGO_IMAGE_TAG}"
     container_name: mongo-setup
     depends_on:
       - mongo-rs0-1
@@ -73,8 +77,8 @@ services:
       - mongo-rs0-2
       - mongo-rs0-3
     volumes:
-      - ELASTICSEARCH_DATA:/usr/share/elasticsearch/data
       - ./elasticsearch/logging.yml:/etc/elasticsearch/logging.yml
+      - ELASTICSEARCH_DATA:/usr/share/elasticsearch/data
     restart: always
 
 
@@ -89,18 +93,71 @@ services:
       - elasticsearch
 
 
-  mariadb:
-    image: "mariadb:10"
-    container_name: mariadb
-    environment:
-      - MYSQL_USER=root
-      - MYSQL_ROOT_PASSWORD=secret-pwd
+#  mariadb:
+#    image: "mariadb:10"
+#    container_name: mariadb
+#    environment:
+#      - MYSQL_USER=root
+#      - MYSQL_ROOT_PASSWORD=secret-pwd
+#    ports:
+#      - "23306:3306"
+#    volumes:
+#      - SQL_DATA:/var/lib/data
+#    restart: always
+
+
+  mariadb-master:
+    image: "bitnami/mariadb:${MARIADB_IMAGE_TAG}"
+    container_name: "mariadb-master"
+    restart: always
     ports:
       - "23306:3306"
     volumes:
-      - SQL_DATA:/var/lib/data
-    restart: always
+      - SQL_MASTER_DATA:/bitnami/mariadb
+     #- ./mariadb-replica/master.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
+    environment:
+      - MARIADB_COLLATE
+      - MARIADB_CHARACTER_SET
+      - MARIADB_SKIP_TEST_DB
+      - MARIADB_REPLICATION_MODE=master
+      - MARIADB_REPLICATION_USER
+      - MARIADB_REPLICATION_PASSWORD
+      - MARIADB_ROOT_USER
+      - MARIADB_ROOT_PASSWORD
+      - MARIADB_USER
+      - MARIADB_PASSWORD
+    healthcheck:
+      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
+      interval: 15s
+      timeout: 5s
+      retries: 6
 
+  mariadb-slave:
+    image: "bitnami/mariadb:${MARIADB_IMAGE_TAG}"
+    container_name: "mariadb-slave"
+    restart: always
+    depends_on:
+      - mariadb-master
+    ports:
+      - "23306:3306"
+    volumes:
+      - SQL_SLAVE_DATA:/bitnami/mariadb
+      #- ./mariadb-replica/slave.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
+    environment:
+      - MARIADB_COLLATE
+      - MARIADB_CHARACTER_SET
+      - MARIADB_SKIP_TEST_DB
+      - MARIADB_REPLICATION_MODE=slave
+      - MARIADB_MASTER_HOST=mariadb-master
+      - MARIADB_MASTER_PORT_NUMBER=3306
+      - MARIADB_MASTER_ROOT_PASSWORD
+      - MARIADB_REPLICATION_USER
+      - MARIADB_REPLICATION_PASSWORD
+    healthcheck:
+      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
+      interval: 15s
+      timeout: 5s
+      retries: 6
 
   redis-master:
     container_name: redis-master
@@ -127,7 +184,7 @@ services:
       - REDIS_MASTER_PORT_NUMBER=6379
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     volumes:
-      - ./redis-replica/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis-replica/redis-slave.conf:/usr/local/etc/redis/redis.conf
       - REDIS_SLAVE_DATA:/data
     command: redis-server /usr/local/etc/redis/redis.conf
 

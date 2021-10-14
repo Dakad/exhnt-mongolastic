@@ -1,5 +1,5 @@
-# Elastic Mongo
-**Docker setup to get Elasticsearch and MongoDB up and running**
+# REDlastic Mongo
+**Docker setup to get Elasticsearch, MongoDB, MariaDB and REDIS up and running**
 
 
 
@@ -12,9 +12,20 @@
 
 git clone https://github.com/Dakad/my-redmongolastic.git dbs-infrastructure
 cd $_
+cp .env.template .env
 docker-compose up -d  # If you skip -d, then the entire clusted will go down when
                       # mongosetup and elasticsearch-river-setup are done.
 ```
+
+Don't forget to set the values to .env vars
+
+To create the required and mount them to a specific folder or device:
+
+```bash
+docker volume create --driver local --opt type=ext4 --opt device=/dev/disk/by-label/SQL_1  --opt o=bind SQL_MASTER_DATA
+...
+```
+
 
 Now you have Elasticsearch and MongoDB configured with mongodb-river.
 
