@@ -107,23 +107,20 @@ services:
 
 
   mariadb-master:
-    image: "bitnami/mariadb:${MARIADB_IMAGE_TAG}"
+    image: "lscr.io/linuxserver/mariadb:${MARIADB_IMAGE_TAG}"
     container_name: "mariadb-master"
     restart: always
     ports:
       - "23306:3306"
     volumes:
-      - SQL_MASTER_DATA:/bitnami/mariadb
+      - SQL_MASTER_DATA:/config
      #- ./mariadb-replica/master.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
     environment:
-      - MARIADB_COLLATE
-      - MARIADB_CHARACTER_SET
-      - MARIADB_SKIP_TEST_DB
-      - MARIADB_REPLICATION_MODE=master
-      - MARIADB_REPLICATION_USER
-      - MARIADB_REPLICATION_PASSWORD
-      - MARIADB_ROOT_USER
-      - MARIADB_ROOT_PASSWORD
+      - PUID
+      - PGID
+      - MYSQL_ROOT_PASSWORD=ROOT_ACCESS_PASSWORD
+      - TZ=Europe/London
+      - MYSQL_ROOT_PASSWORD
       - MARIADB_USER
       - MARIADB_PASSWORD
     healthcheck:
