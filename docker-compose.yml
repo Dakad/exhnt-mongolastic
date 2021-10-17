@@ -18,6 +18,96 @@ volumes:
 
 
 services:
+
+  elasticsearch:
+    hostname: elasticsearch
+    image: stabenfeldt/elasticsearch-marvel
+    container_name: elasticsearch
+    ports:
+      - "29200:9200"
+      - "29300:9300"
+    depends_on:
+      - mongo-rs0-1
+      - mongo-rs0-2
+      - mongo-rs0-3
+    volumes:
+      - ./elasticsearch/logging.yml:/etc/elasticsearch/logging.yml
+      - ELASTICSEARCH_DATA:/usr/share/elasticsearch/data
+    restart: always
+
+  elasticsearch-hq:
+    image: elastichq/elasticsearch-hq
+    container_name: elasticsearch_hq
+    ports:
+      - "25000:5000"
+    environment:
+      - HQ_DEFAULT_URL=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
+
+#  mariadb:
+#    image: "mariadb:10"
+#    container_name: mariadb
+#    environment:
+#      - MYSQL_USER=root
+#      - MYSQL_ROOT_PASSWORD=secret-pwd
+#    ports:
+#      - "23306:3306"
+#    volumes:
+#      - SQL_DATA:/var/lib/data
+#    restart: always
+
+  mariadb-master:
+    image: "lscr.io/linuxserver/mariadb:${MARIADB_IMAGE_TAG}"
+    container_name: "mariadb-master"
+    restart: always
+    ports:
+      - "23306:3306"
+    volumes:
+      - SQL_MASTER_DATA:/config
+     #- ./mariadb-replica/master.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
+    environment:
+      - PUID
+      - PGID
+      - MYSQL_ROOT_PASSWORD=ROOT_ACCESS_PASSWORD
+      - TZ=Europe/London
+      - MYSQL_ROOT_PASSWORD
+      - MARIADB_USER
+      - MARIADB_PASSWORD
+#    healthcheck:
+#      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
+#      interval: 15s
+#      timeout: 5s
+#      retries: 6
+
+  mariadb-slave:
+    image: "bitnami/mariadb:${MARIADB_IMAGE_TAG}"
+    container_name: "mariadb-slave"
+    restart: always
+    depends_on:
+      - mariadb-master
+    ports:
+      - "23306:3306"
+    volumes:
+      - SQL_SLAVE_DATA:/bitnami/mariadb
+      #- ./mariadb-replica/slave.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
+    environment:
+      - MARIADB_COLLATE
+      - MARIADB_CHARACTER_SET
+      - MARIADB_SKIP_TEST_DB
+      - MARIADB_REPLICATION_MODE=slave
+      - MARIADB_MASTER_HOST=mariadb-master
+      - MARIADB_MASTER_PORT_NUMBER=3306
+      - MARIADB_MASTER_ROOT_PASSWORD
+      - MARIADB_REPLICATION_USER
+      - MARIADB_REPLICATION_PASSWORD
+#    healthcheck:
+#      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
+#      interval: 15s
+#      timeout: 5s
+#      retries: 6
+
   mongo-rs0-3:
     image: "mongo:${MONGO_IMAGE_TAG}"
     hostname: mongo-rs0-3
@@ -64,97 +154,6 @@ services:
       - ./scripts/mongo-rs-setup.sh:/scripts/setup.sh
     entrypoint: [ "/scripts/setup.sh" ]
 
-
-  elasticsearch:
-    hostname: elasticsearch
-    image: stabenfeldt/elasticsearch-marvel
-    container_name: elasticsearch
-    ports:
-      - "29200:9200"
-      - "29300:9300"
-    depends_on:
-      - mongo-rs0-1
-      - mongo-rs0-2
-      - mongo-rs0-3
-    volumes:
-      - ./elasticsearch/logging.yml:/etc/elasticsearch/logging.yml
-      - ELASTICSEARCH_DATA:/usr/share/elasticsearch/data
-    restart: always
-
-
-  elasticsearch-hq:
-    image: elastichq/elasticsearch-hq
-    container_name: elasticsearch_hq
-    ports:
-      - "25000:5000"
-    environment:
-      - HQ_DEFAULT_URL=http://elasticsearch:9200
-    depends_on:
-      - elasticsearch
-
-
-#  mariadb:
-#    image: "mariadb:10"
-#    container_name: mariadb
-#    environment:
-#      - MYSQL_USER=root
-#      - MYSQL_ROOT_PASSWORD=secret-pwd
-#    ports:
-#      - "23306:3306"
-#    volumes:
-#      - SQL_DATA:/var/lib/data
-#    restart: always
-
-
-  mariadb-master:
-    image: "lscr.io/linuxserver/mariadb:${MARIADB_IMAGE_TAG}"
-    container_name: "mariadb-master"
-    restart: always
-    ports:
-      - "23306:3306"
-    volumes:
-      - SQL_MASTER_DATA:/config
-     #- ./mariadb-replica/master.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
-    environment:
-      - PUID
-      - PGID
-      - MYSQL_ROOT_PASSWORD=ROOT_ACCESS_PASSWORD
-      - TZ=Europe/London
-      - MYSQL_ROOT_PASSWORD
-      - MARIADB_USER
-      - MARIADB_PASSWORD
-    healthcheck:
-      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
-      interval: 15s
-      timeout: 5s
-      retries: 6
-
-  mariadb-slave:
-    image: "bitnami/mariadb:${MARIADB_IMAGE_TAG}"
-    container_name: "mariadb-slave"
-    restart: always
-    depends_on:
-      - mariadb-master
-    ports:
-      - "23306:3306"
-    volumes:
-      - SQL_SLAVE_DATA:/bitnami/mariadb
-      #- ./mariadb-replica/slave.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
-    environment:
-      - MARIADB_COLLATE
-      - MARIADB_CHARACTER_SET
-      - MARIADB_SKIP_TEST_DB
-      - MARIADB_REPLICATION_MODE=slave
-      - MARIADB_MASTER_HOST=mariadb-master
-      - MARIADB_MASTER_PORT_NUMBER=3306
-      - MARIADB_MASTER_ROOT_PASSWORD
-      - MARIADB_REPLICATION_USER
-      - MARIADB_REPLICATION_PASSWORD
-    healthcheck:
-      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
-      interval: 15s
-      timeout: 5s
-      retries: 6
 
   redis-master:
     container_name: redis-master
