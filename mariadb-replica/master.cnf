@@ -1,31 +1,106 @@
-[mysqladmin]
+## custom configuration file, please be aware that changing options here may break things
+
+[mysql]
+#no-auto-rehash	# faster start of mysql but no tab completion
+default-character-set     = utf8mb4
+
+[mysqld_safe]
+nice		                  = 0
 
 [mysqld]
-skip_name_resolve
-explicit_defaults_for_timestamp
-basedir=/opt/bitnami/mysql
-tmpdir=/opt/bitnami/mysql/tmp
-socket=/opt/bitnami/mysql/tmp/mysql.sock
-pid_file=/opt/bitnami/mysql/tmp/mysqld.pid
-max_allowed_packet=16M
-bind_address=0.0.0.0
-log_error=/opt/bitnami/mysql/logs/mysqld.log
-character_set_server=utf8
-collation_server=utf8_unicode_ci
-plugin_dir=/opt/bitnami/mysql/lib/plugin
-server-id=11
-max-binlog-size =100M 
-binlog_format=ROW
-log-bin
+bind_address              = 0.0.0.0 # Change to 0.0.0.0 to allow remote connections
+character-set-server	    = utf8mb4
+collation-server          = utf8mb4_unicode_520_ci
+max_connections		        = 100
+connect_timeout		        = 5
+wait_timeout		          = 600
+max_allowed_packet	      = 16M
+thread_cache_size         = 128
+sort_buffer_size	        = 4M
+bulk_insert_buffer_size	  = 16M
+tmp_table_size		        = 32M
+max_heap_table_size	      = 32M
+binlog_format= MIXED
+#
+# * MyISAM
+#
+# This replaces the startup script and checks MyISAM tables if needed
+# the first time they are touched. On error, make copy and try a repair.
+myisam_recover_options    = BACKUP
+key_buffer_size		        = 128M
+table_open_cache	        = 400
+myisam_sort_buffer_size	  = 512M
+concurrent_insert	        = 2
+read_buffer_size	        = 2M
+read_rnd_buffer_size	    = 1M
+#
+# * Query Cache Configuration
+#
+# Cache only tiny result sets, so we can fit more in the query cache.
+query_cache_limit		      = 128K
+query_cache_size		      = 64M
+# for more write intensive setups, set to DEMAND or OFF
+#query_cache_type		      = DEMAND
+#
+# * Logging and Replication
+#
+# Both location gets rotated by the cronjob.
+# Be aware that this log type is a performance killer.
+# As of 5.1 you can enable the log at runtime!
+#general_log_file         = /config/log/mysql/mysql.log
+#general_log              = 1
+#
+# Error logging goes to syslog due to /etc/mysql/conf.d/mysqld_safe_syslog.cnf.
+#
+# we do want to know about network errors and such
+log_warnings		          = 2
+#
+# Enable the slow query log to see queries with especially long duration
+slow_query_log            =1
+slow_query_log_file	      = /config/log/mysql/mariadb-slow.log
+long_query_time           = 10
+#log_slow_rate_limit	    = 1000
+log_slow_verbosity	      = query_plan
 
-[client]
-socket=/opt/bitnami/mysql/tmp/mysql.sock
-default_character_set=UTF8
-plugin_dir=/opt/bitnami/mysql/lib/plugin
+#log-queries-not-using-indexes
+#log_slow_admin_statements
+#
+# The following can be used as easy to replay backup logs or for replication.
+# note: if you are setting up a replication slave, see README.Debian about
+#       other settings you may need to change.
+server-id		              = 10
+#report_host		          = master1
+#auto_increment_increment = 2
+#auto_increment_offset	  = 1
+log_bin			              = /config/log/mysql/mariadb-bin
+log_bin_index		          = /config/log/mysql/mariadb-bin.index
+# not fab for performance, but safer
+#sync_binlog              = 1
+expire_logs_days          = 10
+max_binlog_size           = 100M
+#
+# If applications support it, this stricter sql_mode prevents some
+# mistakes like inserting invalid dates etc.
+#sql_mode		              = NO_ENGINE_SUBSTITUTION,TRADITIONAL
+#
+# * InnoDB
+#
+# InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/.
+# Read the manual for more InnoDB related options. There are many!
+default_storage_engine    = InnoDB
+# you can't just change log file size, requires special procedure
+#innodb_log_file_size	    = 50M
+innodb_buffer_pool_size	  = 512M
+innodb_log_buffer_size	  = 16M
+innodb_file_per_table	    = 1
+innodb_open_files	        = 400
+innodb_io_capacity	      = 400
+innodb_flush_method	      = O_DIRECT
 
-[manager]
-socket=/opt/bitnami/mysql/tmp/mysql.sock
-pid_file=/opt/bitnami/mysql/tmp/mysqld.pid
-!include /opt/bitnami/mysql/conf/bitnami
+[mysqldump]
+quick
+quote-names
+max_allowed_packet	      = 512M
 
-/my_custom.cnf
+[isamchk]
+key_buffer_size		        = 16M
