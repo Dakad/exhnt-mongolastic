@@ -19,6 +19,11 @@ volumes:
 
 services:
 
+#################################################################
+### ElasticSearch
+###
+#################################################################
+
   elasticsearch:
     hostname: elasticsearch
     image: stabenfeldt/elasticsearch-marvel
@@ -45,18 +50,10 @@ services:
     depends_on:
       - elasticsearch
 
-
-#  mariadb:
-#    image: "mariadb:10"
-#    container_name: mariadb
-#    environment:
-#      - MYSQL_USER=root
-#      - MYSQL_ROOT_PASSWORD=secret-pwd
-#    ports:
-#      - "23306:3306"
-#    volumes:
-#      - SQL_DATA:/var/lib/data
-#    restart: always
+#################################################################
+### MySQL
+###
+#################################################################
 
   mariadb-master:
     image: "lscr.io/linuxserver/mariadb:${MARIADB_IMAGE_TAG}"
@@ -66,11 +63,11 @@ services:
       - "23306:3306"
     volumes:
       - SQL_MASTER_DATA:/config
+      - ./mariadb-replica/master.cnf:/config/custom.cnf:ro
      #- ./mariadb-replica/master.cnf:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
     environment:
       - PUID
       - PGID
-      - MYSQL_ROOT_PASSWORD=ROOT_ACCESS_PASSWORD
       - TZ=Europe/London
       - MYSQL_ROOT_PASSWORD
       - MARIADB_USER
@@ -107,6 +104,12 @@ services:
 #      interval: 15s
 #      timeout: 5s
 #      retries: 6
+
+
+#################################################################
+### Mongo ReplicaSet
+###
+#################################################################
 
   mongo-rs0-3:
     image: "mongo:${MONGO_IMAGE_TAG}"
@@ -155,6 +158,11 @@ services:
     entrypoint: [ "/scripts/setup.sh" ]
 
 
+#################################################################
+### Redis
+###   Master-_-Slave
+#################################################################
+
   redis-master:
     container_name: redis-master
     image: redis:5-alpine
@@ -167,7 +175,6 @@ services:
     volumes:
       - REDIS_MASTER_DATA:/data
     restart: always
-
 
   redis-slave:
     container_name: redis-slave
@@ -184,6 +191,11 @@ services:
       - REDIS_SLAVE_DATA:/data
     command: redis-server /usr/local/etc/redis/redis.conf
 
+
+#################################################################
+### REDIS
+###   Sentinel
+#################################################################
 
   redis-sentinel-1:
     container_name: redis-sentinel-1
