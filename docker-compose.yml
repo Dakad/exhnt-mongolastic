@@ -125,9 +125,6 @@ services:
       - ./scripts:/scripts
     entrypoint: ["/scripts/disable-disk-treshold.sh"]
 
-    # Verify reading and writing
-    # Run 'docker logs -f elastic-mongo_verify_1' to see what it outputs.
-    # That works even though the container has stopped.
 
     # Verify reading and writing
     # Run 'docker logs -f elastic-mongo_verify_1' to see what it outputs.
